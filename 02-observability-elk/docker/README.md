@@ -2,7 +2,7 @@
 
 ## Démarrer
 
-1. Avec un terminal, se positionner dans le répertoire `Exercice_2/docker`
+1. Avec un terminal, se positionner dans le répertoire `02-observability-elk/docker`
 2. Exécuter la commande suivante:
 
    ```bash

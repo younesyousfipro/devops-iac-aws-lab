@@ -13,14 +13,14 @@ flowchart LR;
 
 ## Démarrer
 
-1. Avec un terminal, se positionner dans le répertoire `Exercice_3/docker`
+1. Avec un terminal, se positionner dans le répertoire `03-load-balancing/docker`
 2. Exécuter la commande suivante:
 
    ```bash
     docker compose up
    ```
 
-3. Le fichier de configuration HAProxy est accessible avec le chemin `Exercice_3/docker/haproxy.conf`. Une fois les modifications apportées à la configuration de celui-ci, il devrait être accessible à l'adresse http://localhost:8080.
+3. Le fichier de configuration HAProxy est accessible avec le chemin `03-load-balancing/docker/haproxy.conf`. Une fois les modifications apportées à la configuration de celui-ci, il devrait être accessible à l'adresse http://localhost:8080.
 
 ## Commandes utiles
 

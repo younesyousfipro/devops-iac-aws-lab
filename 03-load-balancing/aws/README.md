@@ -12,7 +12,7 @@ flowchart LR;
 
 ## Démarrer
 
-1. Avec un terminal, se positionner dans le répertoire `Exercice_3/aws`
+1. Avec un terminal, se positionner dans le répertoire `03-load-balancing/aws`
 2. Exécuter la commande suivante:
 
    ```bash
