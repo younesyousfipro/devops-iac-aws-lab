@@ -1,4 +1,21 @@
-/.ansible
-.terraform*
-*.tfstate*
+# Terraform: local cache and state (the state holds secrets in clear)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+
+# Private keys, in case one is copied here by mistake
+*.pem
+*.key
+
+# Ansible
+.ansible/
+*.retry
+
+# Editor and OS
 .vscode/
+.DS_Store
