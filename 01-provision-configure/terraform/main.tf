@@ -45,3 +45,34 @@ resource "aws_vpc_security_group_egress_rule" "all_outbound" {
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # all protocols and ports
 }
+
+# Looks up the AMI (the disk image the instance boots from) instead of hard-coding its ID:
+# an AMI ID differs by region and gets outdated. Latest Ubuntu 26.04 LTS published by
+# Canonical (owner 099720109477), so nobody else can slip in an image with the same name.
+# Consequence: when Canonical publishes a newer image, plan shows the instance replaced.
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami
+# Owner ID and name pattern: https://documentation.ubuntu.com/aws/aws-how-to/instances/find-ubuntu-images/
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-resolute-26.04-amd64-server-*"]
+  }
+}
+
+# The virtual machine (EC2 instance) that Ansible configures: Ubuntu, reachable over SSH with
+# the key pair above and protected by the security group above. Placed in the default VPC,
+# whose subnets give it a public IP. t3.micro is covered by the Free plan in eu-north-1.
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance
+resource "aws_instance" "web" {
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = "t3.micro"
+  key_name               = aws_key_pair.admin.key_name
+  vpc_security_group_ids = [aws_security_group.web.id]
+
+  tags = {
+    Name = "provision-configure-web" # name shown in the EC2 console
+  }
+}
