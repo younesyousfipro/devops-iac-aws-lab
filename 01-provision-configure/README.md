@@ -1,6 +1,8 @@
-# Exercice 1 - Développez l'infrastructure IaC avec Terraform et automatisez la CD avec Ansible
+# Exercise 1 — Provision and configure
 
-Vous trouverez dans ce dépôt l'ensemble des ressources qui vous accompagnerons pour la réalisation de l'exercice 1. Notamment:
+Terraform creates the server, then Ansible installs what runs on it: nginx serving the Angular app.
 
-- Les exemples de fichier `main.tf` en fonction de l'option choisie pour la première partie: [`./terraform`](./terraform/);
-- Les sources de l'application et les modèles de fichiers d'inventaire Ansible pour la seconde partie: [`./ansible`](./ansible)
+| Folder | Role | Status |
+|---|---|---|
+| [terraform](./terraform) | create the EC2 instance, its firewall and SSH access | done |
+| [ansible](./ansible) | install nginx, deploy the Angular app and its nginx configuration | next (starter kit files for now) |
