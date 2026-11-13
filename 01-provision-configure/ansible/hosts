@@ -6,7 +6,10 @@
 #   it changes at each terraform apply, so update it here after each apply
 # - ansible_user: ubuntu, the default user of Canonical's Ubuntu images
 # - ansible_ssh_private_key_file: path of the private key on the admin laptop (not the key)
+# - ansible_python_interpreter: Ubuntu's system Python; set explicitly so Ansible stops
+#   guessing it (and warning that the guess could change)
+#   https://docs.ansible.com/ansible-core/2.21/reference_appendices/interpreter_discovery.html
 # No group: every host belongs to the default group "all", targeted by deploy.yml.
 # https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html
 
-my-vm ansible_host=13.53.59.8 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_ed25519_aws
+my-vm ansible_host=13.53.59.8 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_ed25519_aws ansible_python_interpreter=/usr/bin/python3
