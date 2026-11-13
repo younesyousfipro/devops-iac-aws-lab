@@ -42,3 +42,35 @@
         owner: root
         group: root
         mode: u=rwX,g=rX,o=rX
+
+    # Puts the site config where Ubuntu's nginx.conf reads it (conf.d/*.conf).
+    # notify: if the file changed, nginx must restart to read it (handler below).
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+    - name: Deploy the nginx site config
+      ansible.builtin.copy:
+        src: nginx/app.conf
+        dest: /etc/nginx/conf.d/app.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart nginx
+
+    # Disables Ubuntu's welcome site: like app.conf, it claims "listen 80 default_server",
+    # and nginx refuses two default servers on one port. sites-enabled/default is only a
+    # link: the original stays in sites-available/. Already gone on a rerun: no change.
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html
+    - name: Disable the default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Restart nginx
+
+  # A handler is a task that runs only when notified, once, after all the tasks of the
+  # play, even if several tasks notified it. notify matches it by its name.
+  # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_handlers.html
+  handlers:
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
