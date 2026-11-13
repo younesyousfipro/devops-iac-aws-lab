@@ -5,4 +5,4 @@ Terraform creates the server, then Ansible installs what runs on it: nginx servi
 | Folder | Role | Status |
 |---|---|---|
 | [terraform](./terraform) | create the EC2 instance, its firewall and SSH access | done |
-| [ansible](./ansible) | install nginx, deploy the Angular app and its nginx configuration | next (starter kit files for now) |
+| [ansible](./ansible) | install nginx, deploy the Angular app and its nginx configuration | done |

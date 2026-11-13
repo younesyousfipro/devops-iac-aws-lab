@@ -1,13 +1,76 @@
 ---
-- name: Openclassrooms P5 EDO deployment
+# Usage, from 01-provision-configure/ansible/:
+#   ansible-playbook -i hosts --syntax-check deploy.yml   # checks the YAML, no connection
+#   ansible-playbook -i hosts deploy.yml         # runs it; a second run must show changed=0
+#   ansible-playbook -i hosts deploy.yml -v      # more output to debug (-vvv: SSH details)
+# https://docs.ansible.com/ansible/latest/cli/ansible-playbook.html
+
+# A play maps hosts to tasks: here every host of the inventory (group "all", only my-vm)
+# gets the tasks below, run in order, top to bottom.
+# become: the tasks run as root through sudo (installing packages and writing to /etc
+# needs it); Ansible still logs in as ansible_user (ubuntu) from the inventory.
+# https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html
+# https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html
+- name: Deploy the Angular app behind nginx
   hosts: all
+  become: true
 
   tasks:
-    # Implémenter ici les tâches:
-    # - d'installation de Nginx;
-    # - d'installation de l'application Angular (voir répertoire ./app);
-    # - de configuration du serveur Nginx pour servir l'application Angular
+    # Installs nginx with apt, the Ubuntu package manager. state: present only installs
+    # it when missing (no upgrade), so a second run changes nothing.
+    # cache_valid_time refreshes the package list (apt-get update) only if it is older
+    # than one hour: a fresh instance gets a fresh list, a rerun skips the download.
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
 
+    # Copies the compiled app from the laptop (src, next to this playbook) to the folder
+    # that app.conf serves (root). The trailing slash on src copies the folder's content,
+    # not the folder itself. A file already identical on the server is not sent again.
+    # root owns the files and nginx (user www-data) can only read them: a flaw in nginx
+    # cannot rewrite the app. In mode, X sets "execute" on folders only, which lets nginx
+    # enter them; files stay non-executable.
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+    - name: Copy the Angular app
+      ansible.builtin.copy:
+        src: app/olympic-games-starter/
+        dest: /var/www/html/olympic-games-starter
+        owner: root
+        group: root
+        mode: u=rwX,g=rX,o=rX
+
+    # Puts the site config where Ubuntu's nginx.conf reads it (conf.d/*.conf).
+    # notify: if the file changed, nginx must restart to read it (handler below).
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+    - name: Deploy the nginx site config
+      ansible.builtin.copy:
+        src: nginx/app.conf
+        dest: /etc/nginx/conf.d/app.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart nginx
+
+    # Disables Ubuntu's welcome site: like app.conf, it claims "listen 80 default_server",
+    # and nginx refuses two default servers on one port. sites-enabled/default is only a
+    # link: the original stays in sites-available/. Already gone on a rerun: no change.
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html
+    - name: Disable the default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Restart nginx
+
+  # A handler is a task that runs only when notified, once, after all the tasks of the
+  # play, even if several tasks notified it. notify matches it by its name.
+  # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_handlers.html
   handlers:
-    # Implémenter ici le handler redémarrant automatiquement le serveur Nginx lorsque le playbook
-    # opère une modification de la configuration du serveur.
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
