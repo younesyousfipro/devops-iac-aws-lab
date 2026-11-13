@@ -22,7 +22,7 @@ Decisions and their reasons are recorded in [docs/decisions.md](./docs/decisions
 | Part | Status |
 |---|---|
 | 00-bootstrap | done |
-| 01-provision-configure | Terraform done; Ansible next |
+| 01-provision-configure | done |
 | 02-observability-elk, 03-load-balancing | starter kit, not started |
 
 ## Credits
