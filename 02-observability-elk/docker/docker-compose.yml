@@ -1,6 +1,9 @@
 services:
+  # Elasticsearch: stores the log lines as JSON documents and answers searches.
+  # Single node, security off: local lab only, hence ports bound to 127.0.0.1.
+  # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/docker.html
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.29
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -14,27 +17,33 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "127.0.0.1:9200:9200"
     networks:
       - elk
 
+  # Kibana: web UI to import the log file, explore it and build the dashboard.
+  # Reaches Elasticsearch by its service name on the elk network.
+  # https://www.elastic.co/guide/en/kibana/7.17/docker.html
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.14.0
+    image: docker.elastic.co/kibana/kibana:7.17.29
     container_name: kibana
     environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
-      - "5601:5601"
+      - "127.0.0.1:5601:5601"
     networks:
       - elk
     depends_on:
       - elasticsearch
 
+# Private network shared by the two containers (name resolution between services).
+# https://docs.docker.com/reference/compose-file/networks/
 networks:
   elk:
     driver: bridge
 
+# Keeps Elasticsearch data, including the saved dashboard, across restarts.
+# https://docs.docker.com/reference/compose-file/volumes/
 volumes:
   esdata:
     driver: local
