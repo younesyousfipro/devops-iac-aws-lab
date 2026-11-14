@@ -1,13 +1,16 @@
 services:
   webserver1:
-    image: nginxdemos/hello
+    image: nginxdemos/hello:0.4
 
   webserver2:
-    image: nginxdemos/hello
+    image: nginxdemos/hello:0.4
 
   haproxy:
-    image: haproxy:2.3
+    image: haproxy:3.4
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    # The image runs as a non-root user since 2.4: allow it to bind port 80
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
     ports:
-      - 8080:80
+      - 127.0.0.1:8080:80
