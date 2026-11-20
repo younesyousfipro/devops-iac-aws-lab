@@ -15,5 +15,11 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.72"
     }
+    # Writes files on the admin laptop: here, the Ansible inventory (main.tf)
+    # https://registry.terraform.io/providers/hashicorp/local/latest/docs
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.9"
+    }
   }
 }

@@ -76,3 +76,14 @@ resource "aws_instance" "web" {
     Name = "provision-configure-web" # name shown in the EC2 console
   }
 }
+
+# Writes the Ansible inventory from its template with the instance's public IP, so that no
+# IP is copied by hand after an apply. The file stays on the laptop (git-ignored) and is
+# deleted by terraform destroy. 0644 because the default permission is 0777.
+# https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+# https://developer.hashicorp.com/terraform/language/functions/templatefile
+resource "local_file" "ansible_inventory" {
+  filename        = "${path.module}/../ansible/hosts"
+  content         = templatefile("${path.module}/../ansible/hosts.tftpl", { public_ip = aws_instance.web.public_ip })
+  file_permission = "0644"
+}
